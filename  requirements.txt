@@ -1,0 +1,7 @@
+# Core dependencies for Reddit monitoring
+praw==7.7.1
+python-dotenv==1.0.1
+requests==2.32.3
+
+# Optional: Enhanced text processing
+nltk==3.8.1
