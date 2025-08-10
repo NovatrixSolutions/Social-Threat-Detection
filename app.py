@@ -1,78 +1,374 @@
-import os
-from dotenv import load_dotenv
-from services.reddit_client import RedditClient
-from services.twitterapi import TwitterClient
+#!/usr/bin/env python3
+"""
+Social Threat Monitor - Flask API
+Individual endpoints for each service with fresh data fetching
+"""
 
-def scan_twitter_by_keyword():
-    client = TwitterClient()
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import json
+import traceback
+from datetime import datetime
+from typing import Dict, Any
 
-    query = os.getenv("TWITTER_SEARCH_QUERY", "harass OR threat OR abuse")
-    max_tweets = int(os.getenv("TWITTER_MAX_TWEETS", "50"))
+from services.reddit_service import RedditService
+from services.twitter_service import TwitterService
+from services.youtube_service import YouTubeService
+from services.gnews_service import GNewsService
+from services.newsapi_service import NewsAPIService
+from utils.logger import setup_logger
 
-    result = client.scan_recent_tweets(query=query, max_tweets=max_tweets)
+app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend integration
 
-    print(f"\n📊 Twitter search results for '{query}':")
-    print(f"   Tweets scanned: {result['tweets_scanned']}")
-    print(f"   Threats found: {result['threats_found']}")
+logger = setup_logger("flask_app")
 
-    for detection in result['detections']:
-        print(f"\n   🚨 {detection['type'].upper()} THREAT DETECTED:")
-        print(f"      Content: {detection['content']}")
-        print(f"      Confidence: {detection['confidence']}")
-        print(f"      Created at: {detection.get('created_at', 'N/A')}")
+# Service instances cache
+service_instances = {}
 
-def main():
-    load_dotenv()
+def get_service_instance(service_name: str):
+    """Get or create service instance with error handling"""
+    if service_name not in service_instances:
+        try:
+            if service_name == "reddit":
+                service_instances[service_name] = RedditService()
+            elif service_name == "twitter":
+                service_instances[service_name] = TwitterService()
+            elif service_name == "youtube":
+                service_instances[service_name] = YouTubeService()
+            elif service_name == "gnews":
+                service_instances[service_name] = GNewsService()
+            elif service_name == "newsapi":
+                service_instances[service_name] = NewsAPIService()
+            else:
+                raise ValueError(f"Unknown service: {service_name}")
 
-    print("🚀 Starting Social Threat Monitor")
-    print("=" * 40)
+            logger.info(f"✅ {service_name.capitalize()} service initialized")
 
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize {service_name}: {e}")
+            return None
+
+    return service_instances[service_name]
+
+@app.route('/api/reddit/scan', methods=['GET'])
+def scan_reddit():
+    """
+    Scan Reddit for threats
+    Query parameters:
+    - subreddit: subreddit name (default: TwoXChromosomes)
+    - limit: number of posts to scan (default: 10)
+    """
     try:
-        # Reddit scanning
-        reddit_client = RedditClient()
+        subreddit = request.args.get('subreddit', 'TwoXChromosomes')
+        limit = request.args.get('limit', 10, type=int)
 
-        subreddits = os.getenv("SUBREDDITS", "").split(",")
-        subreddits = [s.strip() for s in subreddits if s.strip()]
+        service = get_service_instance('reddit')
+        if not service:
+            return jsonify({
+                "success": False,
+                "error": "Reddit service unavailable",
+                "service": "reddit",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 503
 
-        print(f"📋 Monitoring Reddit subreddits: {', '.join(subreddits)}")
-        print("=" * 40)
+        logger.info(f"🔍 Reddit scan requested: r/{subreddit}, limit={limit}")
+        result = service.fetch_data(subreddit_name=subreddit, limit=limit)
 
-        total_threats = 0
-
-        for subreddit_name in subreddits:
-            result = reddit_client.scan_subreddit(subreddit_name)
-
-            if "error" in result:
-                print(f"⚠️ Skipping r/{subreddit_name} due to error: {result['error']}")
-                continue
-
-            print(f"\n📊 r/{result['subreddit']} Results:")
-            print(f"   Posts scanned: {result['posts_scanned']}")
-            print(f"   Threats found: {result['threats_found']}")
-
-            total_threats += result['threats_found']
-
-            for detection in result['detections']:
-                print(f"\n   🚨 {detection['type'].upper()} THREAT DETECTED:")
-                if detection['type'] == 'post':
-                    print(f"      Title: {detection['title']}")
-                    print(f"      URL: {detection['url']}")
-                else:
-                    print(f"      Post: {detection['post_title']}")
-                print(f"      Author: {detection['author']}")
-                print(f"      Content: {detection['content']}")
-                print(f"      Confidence: {detection['confidence']}")
-
-        print("\n" + "=" * 40)
-        print(f"✅ Reddit scan complete! Total threats detected: {total_threats}")
-
-        # Only Twitter keyword search scan (no username)
-        scan_twitter_by_keyword()
+        return jsonify(result)
 
     except Exception as e:
-        print(f"❌ Application error: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"❌ Reddit scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "service": "reddit",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
 
-if __name__ == "__main__":
-    main()
+@app.route('/api/twitter/scan', methods=['GET'])
+def scan_twitter():
+    """
+    Scan Twitter for threats
+    Query parameters:
+    - query: search query (default: harassment OR abuse)
+    - limit: max tweets to scan (default: 50)
+    """
+    try:
+        query = request.args.get('query', 'harassment OR abuse OR threat')
+        limit = request.args.get('limit', 50, type=int)
+
+        service = get_service_instance('twitter')
+        if not service:
+            return jsonify({
+                "success": False,
+                "error": "Twitter service unavailable",
+                "service": "twitter",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 503
+
+        logger.info(f"🔍 Twitter scan requested: query='{query}', limit={limit}")
+        result = service.fetch_data(query=query, max_tweets=limit)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"❌ Twitter scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "service": "twitter",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/api/youtube/scan', methods=['GET'])
+def scan_youtube():
+    """
+    Scan YouTube for threats
+    Query parameters:
+    - query: search query (default: women harassment)
+    - limit: max videos to scan (default: 20)
+    """
+    try:
+        query = request.args.get('query', 'women harassment')
+        limit = request.args.get('limit', 20, type=int)
+
+        service = get_service_instance('youtube')
+        if not service:
+            return jsonify({
+                "success": False,
+                "error": "YouTube service unavailable",
+                "service": "youtube",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 503
+
+        logger.info(f"🔍 YouTube scan requested: query='{query}', limit={limit}")
+        result = service.fetch_data(query=query, max_results=limit)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"❌ YouTube scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "service": "youtube",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/api/gnews/scan', methods=['GET'])
+def scan_gnews():
+    """
+    Scan GNews for threats
+    Query parameters:
+    - query: search query (default: women harassment OR gender violence)
+    - limit: max articles to scan (default: 20)
+    """
+    try:
+        query = request.args.get('query', 'women harassment OR gender violence OR sexual harassment')
+        limit = request.args.get('limit', 20, type=int)
+
+        service = get_service_instance('gnews')
+        if not service:
+            return jsonify({
+                "success": False,
+                "error": "GNews service unavailable",
+                "service": "gnews",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 503
+
+        logger.info(f"🔍 GNews scan requested: query='{query}', limit={limit}")
+        result = service.fetch_data(query=query, max_articles=limit)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"❌ GNews scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "service": "gnews",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/api/newsapi/scan', methods=['GET'])
+def scan_newsapi():
+    """
+    Scan NewsAPI for threats
+    Query parameters:
+    - query: search query (default: women harassment OR abuse)
+    - limit: max articles to scan (default: 20)
+    """
+    try:
+        query = request.args.get('query', 'women harassment OR women abuse OR sexual harassment')
+        limit = request.args.get('limit', 20, type=int)
+
+        service = get_service_instance('newsapi')
+        if not service:
+            return jsonify({
+                "success": False,
+                "error": "NewsAPI service unavailable",
+                "service": "newsapi",
+                "timestamp": datetime.utcnow().isoformat()
+            }), 503
+
+        logger.info(f"🔍 NewsAPI scan requested: query='{query}', limit={limit}")
+        result = service.fetch_data(query=query, max_articles=limit)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"❌ NewsAPI scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "service": "newsapi",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/api/scan/all', methods=['GET'])
+def scan_all_services():
+    """
+    Scan all available services
+    Query parameters:
+    - query: search query for Twitter, YouTube, and news services
+    - subreddit: Reddit subreddit to scan
+    - limit: limit for each service
+    """
+    try:
+        query = request.args.get('query', 'harassment OR abuse')
+        subreddit = request.args.get('subreddit', 'TwoXChromosomes')
+        limit = request.args.get('limit', 20, type=int)
+
+        results = {
+            "scan_timestamp": datetime.utcnow().isoformat(),
+            "total_threats_found": 0,
+            "services_scanned": 0,
+            "services": {}
+        }
+
+        # Define service configurations
+        service_configs = [
+            ("reddit", {"subreddit_name": subreddit, "limit": limit}),
+            ("twitter", {"query": query, "max_tweets": limit}),
+            ("youtube", {"query": query, "max_results": limit}),
+            ("gnews", {"query": query, "max_articles": limit}),
+            ("newsapi", {"query": query, "max_articles": limit})
+        ]
+
+        for service_name, config in service_configs:
+            try:
+                service = get_service_instance(service_name)
+                if service:
+                    logger.info(f"🔍 Scanning {service_name}")
+                    result = service.fetch_data(**config)
+                    results["services"][service_name] = result
+
+                    if result.get("success"):
+                        threats_found = result.get("data", {}).get("threats_found", 0)
+                        results["total_threats_found"] += threats_found
+                        results["services_scanned"] += 1
+                else:
+                    results["services"][service_name] = {
+                        "success": False,
+                        "error": f"{service_name} service unavailable",
+                        "timestamp": datetime.utcnow().isoformat()
+                    }
+
+            except Exception as e:
+                logger.error(f"❌ Error scanning {service_name}: {e}")
+                results["services"][service_name] = {
+                    "success": False,
+                    "error": str(e),
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+
+        results["scan_completed"] = datetime.utcnow().isoformat()
+        logger.info(f"✅ All services scan completed: {results['total_threats_found']} total threats found")
+
+        return jsonify(results)
+
+    except Exception as e:
+        logger.error(f"❌ All services scan error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    try:
+        services_status = {}
+
+        for service_name in ["reddit", "twitter", "youtube", "gnews", "newsapi"]:
+            try:
+                service = get_service_instance(service_name)
+                services_status[service_name] = "available" if service else "unavailable"
+            except Exception:
+                services_status[service_name] = "error"
+
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "services": services_status,
+            "endpoints": [
+                "/api/reddit/scan",
+                "/api/twitter/scan",
+                "/api/youtube/scan",
+                "/api/gnews/scan",
+                "/api/newsapi/scan",
+                "/api/scan/all",
+                "/api/health"
+            ]
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "error": "Endpoint not found",
+        "available_endpoints": [
+            "GET /api/reddit/scan?subreddit=<name>&limit=<num>",
+            "GET /api/twitter/scan?query=<text>&limit=<num>",
+            "GET /api/youtube/scan?query=<text>&limit=<num>",
+            "GET /api/gnews/scan?query=<text>&limit=<num>",
+            "GET /api/newsapi/scan?query=<text>&limit=<num>",
+            "GET /api/scan/all",
+            "GET /api/health"
+        ]
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        "error": "Internal server error",
+        "timestamp": datetime.utcnow().isoformat()
+    }), 500
+
+if __name__ == '__main__':
+    logger.info("🚀 Starting Social Threat Monitor API Server")
+    logger.info("📋 Available endpoints:")
+    logger.info("   GET /api/reddit/scan?subreddit=<name>&limit=<num>")
+    logger.info("   GET /api/twitter/scan?query=<text>&limit=<num>")
+    logger.info("   GET /api/youtube/scan?query=<text>&limit=<num>")
+    logger.info("   GET /api/gnews/scan?query=<text>&limit=<num>")
+    logger.info("   GET /api/newsapi/scan?query=<text>&limit=<num>")
+    logger.info("   GET /api/scan/all?query=<text>&subreddit=<name>&limit=<num>")
+    logger.info("   GET /api/health")
+
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
