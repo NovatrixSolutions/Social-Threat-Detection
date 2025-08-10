@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Threat Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="platform.css">
+</head>
+<body>
+    <div id="vanta-bg"></div>
+    
+    <div class="container">
+        <div class="platform-header">
+            <img src="assests/twitter-logo.jpeg" alt="Twitter" class="platform-logo pulse">
+            <h1>Twitter Threat Analysis</h1>
+        </div>
+        
+        <div class="search-container floating">
+            <input type="text" id="searchInput" placeholder="Enter keywords to analyze..." class="search-input">
+            <button id="searchBtn" class="search-btn">Analyze</button>
+        </div>
+        
+        <div id="resultsSection" style="display: none;">
+            <div class="threat-visualization" id="threatViz"></div>
+            
+            <div class="results-box">
+                <h2>Detected Threats</h2>
+                <div class="tweets-container" id="tweetsContainer">
+                    <!-- Tweets will be dynamically inserted here -->
+                </div>
+            </div>
+            
+            <button id="generateReportBtn" class="report-btn floating">
+                Generate Comprehensive Report
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <script src="js/platform.js"></script>
+</body>
+</html>
