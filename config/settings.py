@@ -28,3 +28,4 @@ class Config:
     TWITTER_MAX_TWEETS = int(os.getenv("TWITTER_MAX_TWEETS", "50"))
     YOUTUBE_MAX_RESULTS = int(os.getenv("YOUTUBE_MAX_RESULTS", "20"))
     NEWS_MAX_ARTICLES = int(os.getenv("NEWS_MAX_ARTICLES", "20"))
+    GNEWS_MAX_ARTICLES = int(os.getenv("GNEWS_MAX_ARTICLES", "20"))

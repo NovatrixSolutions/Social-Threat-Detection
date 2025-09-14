@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GNews Threat Analysis</title>
+    <title>NewsAPI Threat Analysis</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="platform.css">
     <style>
         :root {
-            --primary-color: #34A853;
-            --secondary-color: #5DBE7E;
-            --accent-color: #1B8D3E;
+            --primary-color: #2A5CAA;F
+            --secondary-color: #3A7BDA;
+            --accent-color: #1A4B8C;
         }
         h1 {
             background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
@@ -20,7 +20,7 @@
         .search-btn, .report-btn {
             background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         }
-        .tweet-card {
+        .article-card {
             border-left-color: var(--primary-color);
         }
     </style>
@@ -30,8 +30,8 @@
 
 <div class="container">
     <div class="platform-header">
-        <img src="assests/gnews.jpeg" alt="GNews" class="platform-logo pulse">
-        <h1>GNews Threat Analysis</h1>
+        <img src="assests/gnews.jpeg" alt="GNEWS" class="platform-logo pulse">
+        <h1 style="color:white">GNewsAPI Threat Analysis</h1>
     </div>
 
     <div class="search-container floating">
@@ -58,70 +58,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
 <script src="js/platform.js"></script>
+</body>
 </html>
 
-
-
-
-
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>GNewsAPI Threat Analysis</title>-->
-<!--    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
-<!--    <link rel="stylesheet" href="platform.css">-->
-<!--    <style>-->
-<!--        :root {-->
-<!--            &#45;&#45;primary-color: #34A853;-->
-<!--            &#45;&#45;secondary-color: #5DBE7E;-->
-<!--            &#45;&#45;accent-color: #1B8D3E;-->
-<!--        }-->
-<!--        h1 {-->
-<!--            background: linear-gradient(90deg, var(&#45;&#45;primary-color), var(&#45;&#45;secondary-color));-->
-<!--            -webkit-background-clip: text;-->
-<!--            background-clip: text;-->
-<!--        }-->
-<!--        .search-btn, .report-btn {-->
-<!--            background: linear-gradient(135deg, var(&#45;&#45;primary-color), var(&#45;&#45;accent-color));-->
-<!--        }-->
-<!--        .tweet-card {-->
-<!--            border-left-color: var(&#45;&#45;primary-color);-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--    <div id="vanta-bg"></div>-->
-<!--    -->
-<!--    <div class="container">-->
-<!--        <div class="platform-header">-->
-<!--            <img src="assests/gnews.jpeg" alt="GNewsAPI" class="platform-logo pulse">-->
-<!--            <h1>GNewsAPI Threat Analysis</h1>-->
-<!--        </div>-->
-<!--        -->
-<!--        <div class="search-container floating">-->
-<!--            <input type="text" id="searchInput" placeholder="Enter keywords to analyze..." class="search-input">-->
-<!--            <button id="searchBtn" class="search-btn">Analyze</button>-->
-<!--        </div>-->
-<!--        -->
-<!--        <div id="resultsSection" style="display: none;">-->
-<!--            <div class="threat-visualization" id="threatViz"></div>-->
-<!--            -->
-<!--            <div class="results-box">-->
-<!--                <h2>Detected Threats</h2>-->
-<!--                <div class="tweets-container" id="tweetsContainer">-->
-<!--                    &lt;!&ndash; Tweets will be dynamically inserted here &ndash;&gt;-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            -->
-<!--            <button id="generateReportBtn" class="report-btn floating">-->
-<!--                Generate Comprehensive Report-->
-<!--            </button>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>-->
-<!--    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>-->
-<!--    <script src="js/platform.js"></script>-->
-<!--</html>-->
