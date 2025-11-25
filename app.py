@@ -124,34 +124,35 @@ def scan_youtube():
             "timestamp": datetime.utcnow().isoformat()
         }), 500
 
-@app.route('/api/gnews/scan', methods=['GET'])
-def scan_gnews():
+@app.route('/api/gnewsapi/scan', methods=['GET'])
+def scan_gnewsapi():
     try:
         query = request.args.get('query', 'women harassment OR gender violence OR sexual harassment')
         limit = request.args.get('limit', 20, type=int)
 
-        service = get_service_instance('gnews')
+        service = get_service_instance('gnews')  # Still uses gnews service
         if not service:
             return jsonify({
                 "success": False,
                 "error": "GNews service unavailable",
-                "service": "gnews",
+                "service": "gnewsapi",
                 "timestamp": datetime.utcnow().isoformat()
             }), 503
 
-        logger.info(f"🔍 GNews scan requested: query='{query}', limit={limit}")
+        logger.info(f"🔍 GNewsAPI scan requested: query='{query}', limit={limit}")
         result = service.fetch_data(query=query, max_articles=limit)
         return jsonify(result)
 
     except Exception as e:
-        logger.error(f"❌ GNews scan error: {e}")
+        logger.error(f"❌ GNewsAPI scan error: {e}")
         logger.error(traceback.format_exc())
         return jsonify({
             "success": False,
             "error": str(e),
-            "service": "gnews",
+            "service": "gnewsapi",
             "timestamp": datetime.utcnow().isoformat()
         }), 500
+
 
 @app.route('/api/newsapi/scan', methods=['GET'])
 def scan_newsapi():
