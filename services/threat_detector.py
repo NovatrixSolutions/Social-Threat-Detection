@@ -9,7 +9,7 @@ class ThreatDetector:
         self.logger = setup_logger("threat_detector")
         # Women harassment/abuse specific keywords
         self.keywords = [
-            # Core harassment (22 existing + expanded)
+            # Core harassment
             "harassment", "harass", "abuse", "abused", "abusing", "stalker", "stalking",
             "creep", "creepy", "threat", "violence", "assault", "rape", "sexual harassment",
             "domestic violence", "gender violence", "intimidate", "molest", "grope",

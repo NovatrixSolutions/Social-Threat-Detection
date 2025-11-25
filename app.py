@@ -18,6 +18,8 @@ from services.youtube_service import YouTubeService
 from services.gnews_service import GNewsService
 from services.newsapi_service import NewsAPIService
 from utils.logger import setup_logger
+import os
+
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend integration
@@ -361,6 +363,8 @@ def internal_error(error):
     }), 500
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    logger.info("🚀 Starting Social Threat Monitor API Server")
     logger.info("🚀 Starting Social Threat Monitor API Server")
     logger.info("📋 Available endpoints:")
     logger.info("   GET /api/reddit/scan?subreddit=<name>&limit=<num>")
@@ -370,6 +374,6 @@ if __name__ == '__main__':
     logger.info("   GET /api/newsapi/scan?query=<text>&limit=<num>")
     logger.info("   GET /api/scan/all?query=<text>&subreddit=<name>&limit=<num>")
     logger.info("   GET /api/health")
+    app.run(debug=False, host='0.0.0.0', port=port)  # Fixed for Render
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
 
