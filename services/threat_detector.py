@@ -9,13 +9,49 @@ class ThreatDetector:
         self.logger = setup_logger("threat_detector")
         # Women harassment/abuse specific keywords
         self.keywords = [
-            "harassment", "harass", "abuse", "abused", "abusing",
-            "stalker", "stalking", "creep", "creepy", "threat",
-            "violence", "assault", "rape", "sexual harassment",
-            "domestic violence", "gender violence", "intimidate",
-            "molest", "grope", "catcall", "victim", "predator"
+            # Core harassment (22 existing + expanded)
+            "harassment", "harass", "abuse", "abused", "abusing", "stalker", "stalking",
+            "creep", "creepy", "threat", "violence", "assault", "rape", "sexual harassment",
+            "domestic violence", "gender violence", "intimidate", "molest", "grope",
+            "catcall", "victim", "predator",
+
+            # Misogynistic slurs (high frequency on social media)
+            "slut", "whore", "bitch", "cunt", "hoe", "thot", "skank", "tramp", "slag",
+            "loose", "desperate", "golddigger", "feminazi", "feminism",
+
+            # Online threats & doxxing
+            "doxx", "doxxed", "swatting", "revenge porn", "deepfake", "nonconsensual",
+            "following me", "watching me", "know where you live", "find you", "track you",
+
+            # Violence & suicide threats
+            "kill you", "hurt your family", "die", "suicide", "jump", "cut yourself",
+            "bullet in head", "beat you", "gangbang", "forced", "trafficked",
+
+            # Sexual violence specifics
+            "pedophile", "incest", "child abuse", "underage", "grooming", "sextortion",
+            "unsolicited dick pic", "nudes or else",
+
+            # Body/appearance shaming
+            "fat pig", "ugly", "butterface", "manface", "tits", "ass", "objectify",
+
+            # Professional/workplace
+            "HR complaint", "hostile environment", "quid pro quo", "glass ceiling",
+            "mansplaining", "not like other girls",
+
+            # Cyber-specific attacks
+            "cyberbullying", "trolling", "flaming", "griefing", "shock trolling",
+            "mob attack", "pile on", "cancel her",
+
+            # Relationship abuse
+            "cheater", "homewrecker", "mistress", "side chick", "baby mama drama",
+
+            # Dehumanization terms
+            "thing", "object", "vermin", "prostitute", "psychopath", "lying bitch",
+
+            # Intersectional threats
+            "race traitor", "blasphemy", "deadnaming", "TERF", "handmaid"
         ]
-        self.logger.info(f"Loaded {len(self.keywords)} women harassment/abuse keywords")
+        self.logger.info(f"Loaded {len(self.keywords)} women harassment/abuse keywords")  # ← FIXED: 8 spaces indent
 
     def detect_threat(self, text: str) -> bool:
         """Enhanced threat detection focused on women harassment/abuse"""
