@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-Social Threat Monitor - Flask API
-Individual endpoints for each service with fresh data fetching
+Social Threat Monitor - Flask API + Static Frontend
+COMPLETE FULL-STACK: API + HTML/CSS/JS Frontend
 TWITTER DISABLED - Python 3.13 imghdr compatibility issue
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import json
 import traceback
 import sys
 from datetime import datetime
 from typing import Dict, Any
+import os
 
 from services.reddit_service import RedditService
 # from services.twitter_service import TwitterService  # 🚫 DISABLED Python 3.13
@@ -19,7 +20,6 @@ from services.youtube_service import YouTubeService
 from services.gnews_service import GNewsService
 from services.newsapi_service import NewsAPIService
 from utils.logger import setup_logger
-import os
 
 app = Flask(__name__)
 CORS(app)
@@ -233,7 +233,6 @@ def scan_all_services():
 
         results["scan_completed"] = datetime.utcnow().isoformat()
         logger.info(f"✅ All services scan completed: {results['total_threats_found']} total threats found")
-
         return jsonify(results)
 
     except Exception as e:
@@ -250,12 +249,11 @@ def health_check():
     """Health check endpoint"""
     try:
         services_status = {}
-        # Twitter always shows unavailable
         for service_name in ["reddit", "twitter", "youtube", "gnews", "newsapi"]:
             try:
                 service = get_service_instance(service_name)
                 if service_name == "twitter":
-                    services_status[service_name] = "unavailable"
+                    services_status[service_name] = "unavailable (disabled)"
                 else:
                     services_status[service_name] = "available" if service else "unavailable"
             except Exception:
@@ -283,20 +281,18 @@ def health_check():
             "timestamp": datetime.utcnow().isoformat()
         }), 500
 
+# 🚀 CRITICAL: Static File Serving for Frontend
+@app.route('/', defaults={'path': 'index.html'})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    """Serve HTML/CSS/JS frontend files"""
+    if path != "api" and not path.startswith('api/'):
+        return send_from_directory('.', path)
+    return jsonify({"error": "API endpoint not found"}), 404
+
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({
-        "error": "Endpoint not found",
-        "available_endpoints": [
-            "GET /api/reddit/scan?subreddit=<name>&limit=<num>",
-            "GET /api/twitter/scan?query=<text>&limit=<num>",
-            "GET /api/youtube/scan?query=<text>&limit=<num>",
-            "GET /api/gnews/scan?query=<text>&limit=<num>",
-            "GET /api/newsapi/scan?query=<text>&limit=<num>",
-            "GET /api/scan/all",
-            "GET /api/health"
-        ]
-    }), 404
+    return send_from_directory('.', 'index.html'), 200  # SPA fallback
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -307,17 +303,10 @@ def internal_error(error):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    logger.info("🚀 Starting Social Threat Monitor API Server")
-    logger.info("📋 Available endpoints:")
-    logger.info("   GET /api/reddit/scan?subreddit=<name>&limit=<num>")
-    logger.info("   GET /api/twitter/scan?query=<text>&limit=<num>")
-    logger.info("   GET /api/youtube/scan?query=<text>&limit=<num>")
-    logger.info("   GET /api/gnews/scan?query=<text>&limit=<num>")
-    logger.info("   GET /api/newsapi/scan?query=<text>&limit=<num>")
-    logger.info("   GET /api/scan/all?query=<text>&subreddit=<name>&limit=<num>")
-    logger.info("   GET /api/health")
+    logger.info("🚀 Starting Social Threat Monitor FULL-STACK Server")
+    logger.info("🌐 Frontend: /, /dashboard.html, /platform-reddit.html")
+    logger.info("🔌 API: /api/health, /api/scan/all, /api/reddit/scan")
     app.run(debug=False, host='0.0.0.0', port=port)
-
 
 
 
