@@ -1,24 +1,6 @@
-// API Configuration
-//const API_CONFIG = {
-//    BASE_URL: 'http://127.0.0.1:5000/api',
-//    ENDPOINTS: {
-//        HEALTH: '/health',
-//        SCAN_ALL: '/scan/all',
-//        REDDIT: '/reddit/scan',
-//        TWITTER: '/twitter/scan',
-//        YOUTUBE: '/youtube/scan',
-//        GNEWS: '/gnews/scan',
-//        NEWSAPI: '/newsapi/scan'
-//    },
-//    DEFAULT_PARAMS: {
-//        LIMIT: 10,
-//        QUERY: 'harassment OR abuse',
-//        SUBREDDIT: 'TwoXChromosomes'
-//    }
-//};
-// ✅ FIXED - Works on LOCAL + Render
+ //API Configuration
 const API_CONFIG = {
-    BASE_URL: window.location.origin + '/api',  // Dynamic: localhost or render.com
+    BASE_URL: 'http://127.0.0.1:5000/api',
     ENDPOINTS: {
         HEALTH: '/health',
         SCAN_ALL: '/scan/all',
@@ -34,6 +16,24 @@ const API_CONFIG = {
         SUBREDDIT: 'TwoXChromosomes'
     }
 };
+//  Works on LOCAL + Render
+//const API_CONFIG = {
+//    BASE_URL: window.location.origin + '/api',  // Dynamic: localhost or render.com
+//    ENDPOINTS: {
+//        HEALTH: '/health',
+//        SCAN_ALL: '/scan/all',
+//        REDDIT: '/reddit/scan',
+//        TWITTER: '/twitter/scan',
+//        YOUTUBE: '/youtube/scan',
+//        GNEWS: '/gnews/scan',
+//        NEWSAPI: '/newsapi/scan'
+//    },
+//    DEFAULT_PARAMS: {
+//        LIMIT: 10,
+//        QUERY: 'harassment OR abuse',
+//        SUBREDDIT: 'TwoXChromosomes'
+//    }
+//};
 
 
 // Utility function for API calls

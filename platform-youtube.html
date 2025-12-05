@@ -27,28 +27,28 @@
 </head>
 <body>
     <div id="vanta-bg"></div>
-    
+
     <div class="container">
         <div class="platform-header">
             <img src="assests/generated-image.png" alt="Twitter" class="platform-logo pulse">
             <h1>Youtube Threat Analysis</h1>
         </div>
-        
+
         <div class="search-container floating">
             <input type="text" id="searchInput" placeholder="Enter keywords to analyze..." class="search-input">
             <button id="searchBtn" class="search-btn">Analyze</button>
         </div>
-        
+
         <div id="resultsSection" style="display: none;">
             <div class="threat-visualization" id="threatViz"></div>
-            
+
             <div class="results-box">
                 <h2>Detected Threats</h2>
                 <div class="tweets-container" id="tweetsContainer">
                     <!-- Tweets will be dynamically inserted here -->
                 </div>
             </div>
-            
+
             <button id="generateReportBtn" class="report-btn floating">
                 Generate Comprehensive Report
             </button>

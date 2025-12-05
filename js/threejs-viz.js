@@ -1,6 +1,6 @@
 // API Configuration (same as above)
 const API_CONFIG = {
-   BASE_URL: window.location.origin + '/api',  // Dynamic: localhost or render.com
+    BASE_URL: 'http://127.0.0.1:5000/api',
     ENDPOINTS: {
         HEALTH: '/health',
         SCAN_ALL: '/scan/all'
